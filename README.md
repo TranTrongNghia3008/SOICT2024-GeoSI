@@ -19,10 +19,10 @@ GeoSI - An interesting interactive system to assist people in retrieving news fr
 This source code implements GeoSI, submitted to SOICT 2024. It is a question-answering system that utilizes the latest online data and organizes information on a map to analyze trends specific to different regions.
 
 # Workflow
-<!-- ![Overall Workflow](assets/overall_flow.png "Overall Workflow") -->
-
 <center>
-  <iframe src="OverviewArchitecture.pdf" width="600" height="400"></iframe>
+  <img
+    src="OverviewArchitecture.png"
+  >
   <figcaption>Overall Workflow</figcaption>
 </center>
 
