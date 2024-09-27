@@ -22,9 +22,7 @@ This source code implements GeoSI, submitted to SOICT 2024. It is a question-ans
 <!-- ![Overall Workflow](assets/overall_flow.png "Overall Workflow") -->
 
 <center>
-  <img
-    src="OverviewArchitecture.pdf"
-  >
+  <iframe src="OverviewArchitecture.pdf" width="600" height="400"></iframe>
   <figcaption>Overall Workflow</figcaption>
 </center>
 
