@@ -29,3 +29,16 @@ This source code implements GeoSI, submitted to SOICT 2024. It is a question-ans
 # Testing pipeline
 
 Please refer to this [Colab link](https://colab.research.google.com/drive/15RsJgG7nXEvnN5-ERo7MhZtJWrqoCxQO?usp=sharing) to run a test of the system's pipeline.
+
+# Compare the results of the Q&A responses
+- **Question 1:** Give me the current climate change situation on vnexpress website
+	- Gemini:  ![Response of Gemini](results/Gemini1.png "Response of Gemini")
+	- BingAI:	![Response of BingAI](results/Bing1.png "Response of BingAI") 
+	- ChatGPT:	![Response of ChatGPT](results/ChatGPT1.png "Response of ChatGPT") 
+	- GeoSI: ![Response of GeoSI](results/GeoSI1.png "Response of GeoSI") 
+		
+- **Question 2:** Severe flooding and emergencies due to Typhoon Yagi.
+	- Gemini:  ![Response of Gemini](results/Gemini2.png "Response of Gemini")
+	- BingAI:	![Response of BingAI](results/Bing2.png "Response of BingAI") 
+	- ChatGPT:	![Response of ChatGPT](results/ChatGPT2.png "Response of ChatGPT") 
+	- GeoSI: ![Response of GeoSI](results/GeoSI2.png "Response of GeoSI")
