@@ -41,4 +41,5 @@ Please refer to this [Colab link](https://colab.research.google.com/drive/15RsJg
 	- Gemini:  ![Response of Gemini](results/Gemini2.png "Response of Gemini")
 	- BingAI:	![Response of BingAI](results/Bing2.png "Response of BingAI") 
 	- ChatGPT:	![Response of ChatGPT](results/ChatGPT2.png "Response of ChatGPT") 
-	- GeoSI: ![Response of GeoSI](results/GeoSI2.png "Response of GeoSI")
+	- GeoSI: <img src="results/GeoSI2.png" alt="Response of GeoSI" title="Response of GeoSI" style="width: 50%;"/>
+ - 	
