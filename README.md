@@ -1,16 +1,22 @@
-# ACM ICMR 2024 - Grand Challenge on Detecting Cheapfakes Source Code
+
+# SOICT 2024
+
+# Title
+GeoSI - An interesting interactive system to assist people in retrieving news from multiple online sources and mapping it through maps
 
 # Authors
-| No. | Author                        | Email | ORCID |
-|-----|-------------------------------|-------|-------|
-| 1   | Dang Vu<sup>*</sup>           | 23c15023@student.hcmus.edu.vn | 0009-0003-3268-024X |
-| 2   | Quoc-Trung Nguyen<sup>*</sup> | 21120107@student.hcmus.edu.vn | 0009-0008-3746-389X |
-| 3   | Minh-Nhat Nguyen<sup>*</sup>  | 21120350@student.hcmus.edu.vn | 0009-0001-5959-6107 |
+| No. | Author                        | Email |
+|-----|-------------------------------|-------|
+| 1   | Minh-Nhat Nguyen<sup>*</sup>           | 21120107@student.hcmus.edu.vn |
+| 2   | Trong-Nghia Tran<sup>*</sup> | 21120507@student.hcmus.edu.vn |
+| 3   | Minh-Triet Tran<sup>**</sup>  | tmtriet@fit.hcmus.edu.vn |
 
-(*<sup>*</sup>* All authors contributed equally to this research.)
+*<sup>*</sup>*  Both authors contribute equally.
+*<sup>**</sup>*  Corresponding author
+
 
 # Description
-This source code is based on COSMOS algorithm, used for Cheapfake Challenge ICMR 2024 - Task 1
+This source code implements GeoSI, submitted to SOICT 2024. It is a question-answering system that utilizes the latest online data and organizes information on a map to analyze trends specific to different regions.
 
 # Workflow
 <!-- ![Overall Workflow](assets/overall_flow.png "Overall Workflow") -->
