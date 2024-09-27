@@ -23,7 +23,7 @@ This source code implements GeoSI, submitted to SOICT 2024. It is a question-ans
 
 <center>
   <img
-    src="assets/overall_flow.png"
+    src="OverviewArchitecture.pdf"
   >
   <figcaption>Overall Workflow</figcaption>
 </center>
