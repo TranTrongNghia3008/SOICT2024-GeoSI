@@ -26,6 +26,6 @@ This source code implements GeoSI, submitted to SOICT 2024. It is a question-ans
   <figcaption>Overall Workflow</figcaption>
 </center>
 
-# Instruction for evaluating source code
+# Testing pipeline
 
 Please refer to this [Colab link](https://colab.research.google.com/drive/15RsJgG7nXEvnN5-ERo7MhZtJWrqoCxQO?usp=sharing) to run a test of the system's pipeline.
