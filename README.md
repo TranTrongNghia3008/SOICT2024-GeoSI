@@ -2,7 +2,7 @@
 # SOICT 2024
 
 # Title
-GeoSI - An interesting interactive system to assist people in retrieving news from multiple online sources and mapping it through maps
+GeoSI: An Interesting Interactive System for Retrieving and Mapping News from Multiple Online Sources
 
 # Authors
 | No. | Author                        | Email |
