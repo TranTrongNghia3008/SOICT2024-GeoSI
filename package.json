@@ -10,7 +10,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "connect-flash": "^0.1.1",
     "express": "^4.19.2",
-    "express-handlebars": "^8.0.1"
+    "express-handlebars": "^8.0.1",
+    "express-session": "^1.18.0",
+    "mongodb": "^6.9.0",
+    "mongoose": "^8.7.0"
   }
 }
