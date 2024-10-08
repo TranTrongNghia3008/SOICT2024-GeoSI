@@ -6,8 +6,8 @@ const expressHandlebars = require('express-handlebars');
 const bodyParser = require('body-parser');
 const flash = require('connect-flash');
 const session = require('express-session');
-// const passport = require('./controllers/passport');
-// const { ensureAuthenticated } = require('./middlewares/auth');
+const passport = require('./controllers/passport');
+const { ensureAuthenticated } = require('./middlewares/auth');
  
 app.use(express.static(__dirname + "/public"));
 
@@ -79,8 +79,8 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
 }));
-// app.use(passport.initialize());
-// app.use(passport.session());
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use((req, res, next) => {
     res.locals.isAuthenticated = req.isAuthenticated();
@@ -90,16 +90,18 @@ app.use((req, res, next) => {
     next();
 });
 
-// app.get("/", (req, res) => {
-//     if (req.isAuthenticated()) {
-//       res.redirect("/dashboard");
-//     } else {
-//       res.redirect("/login");
-//     }
-//   });
-// app.use('/login', require('./routes/loginRouter'));
-// app.use('/register', require('./routes/registerRouter'));
-// app.use('/logout', require('./routes/logoutRouter'));
+
+app.get("/", (req, res) => {
+    if (req.isAuthenticated()) {
+      res.redirect("/q-and-a");
+    } else {
+      res.redirect("/login");
+    }
+  });
+app.use('/login', require('./routes/loginRouter'));
+app.use('/register', require('./routes/registerRouter'));
+app.use('/q-and-a', ensureAuthenticated, require('./routes/q-and-aRouter'));
+app.use('/logout', require('./routes/logoutRouter'));
 // app.use('/dashboard', ensureAuthenticated, require('./routes/dasdboardRouter'));
 // app.use('/project', ensureAuthenticated, require('./routes/projectRouter'));
 // app.use('/administration', ensureAuthenticated, require('./routes/administrationRouter'));
