@@ -101,3 +101,8 @@
     overflow-y: auto;    /* Cuộn khi nội dung vượt quá */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  /* Hiệu ứng đổ bóng */
   }
+
+.chat-list-item {
+    text-decoration: none; /* Loại bỏ dấu gạch chân */
+    color: black; /* Đổi màu chữ thành màu đen */
+}

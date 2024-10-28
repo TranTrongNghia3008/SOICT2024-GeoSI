@@ -8,8 +8,8 @@
                         <span class="navbar-toggler-icon"></span>
                     </button>
                     <h2 class="text-primary">Q & A</h2>
-                    <a href="" class="">
-                    <img src="/images/new-chat-icon.png" style="width: 3rem; height: 3rem;" alt="">
+                    <a href="#" class="new-chat" id="newChat" onclick="createNewChat('{{user._id}}')">
+                        <img src="/images/new-chat-icon.png" style="width: 3rem; height: 3rem;" alt="">
                     </a>
                 </div>
     
@@ -19,30 +19,17 @@
             <div class="chat-list shadow-sm rounded d-none" id="chatList">
                 <h5 class="p-2">Your conversation list</h5>
                 <div class="list-group">
-                    <a href="#" class="list-group-item list-group-item-action active" aria-current="true">
-                        The current link item
-                    </a>
-                    <a href="#" class="list-group-item list-group-item-action">A second link item</a>
-                    <a href="#" class="list-group-item list-group-item-action">A third link item</a>
-                    <a href="#" class="list-group-item list-group-item-action">A fourth link item</a>
-                    <a href="#" class="list-group-item list-group-item-action">A second link item</a>
-                    <a href="#" class="list-group-item list-group-item-action">A third link item</a>
-                    <a href="#" class="list-group-item list-group-item-action">A fourth link item</a>
-                    <a href="#" class="list-group-item list-group-item-action">A second link item</a>
-                    <a href="#" class="list-group-item list-group-item-action">A third link item</a>
-                    <a href="#" class="list-group-item list-group-item-action">A fourth link item</a>
-                    <a href="#" class="list-group-item list-group-item-action">A second link item</a>
-                    <a href="#" class="list-group-item list-group-item-action">A third link item</a>
-                    <a href="#" class="list-group-item list-group-item-action">A fourth link item</a>
-                    <a href="#" class="list-group-item list-group-item-action">A second link item</a>
-                    <a href="#" class="list-group-item list-group-item-action">A third link item</a>
-                    <a href="#" class="list-group-item list-group-item-action">A fourth link item</a>
-                    <a href="#" class="list-group-item list-group-item-action">A second link item</a>
-                    <a href="#" class="list-group-item list-group-item-action">A third link item</a>
-                    <a href="#" class="list-group-item list-group-item-action">A fourth link item</a>
-                    <a href="#" class="list-group-item list-group-item-action">A second link item</a>
-                    <a href="#" class="list-group-item list-group-item-action">A third link item</a>
-                    <a href="#" class="list-group-item list-group-item-action">A fourth link item</a>
+                    {{#each conversations}} 
+                    <div class=" d-flex justify-content-between list-group-item list-group-item-action">
+                        <a href="#" class="chat-list-item" data-id="{{this._id}}" onclick="loadHistory('{{this._id}}')">
+                            {{this.Title}}
+                        </a>
+                        <a href="" data-bs-toggle="tooltip" title="Delete" class="mx-2 my-auto text-danger delete-history" data-id="{{this._id}}">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </div>
+                        
+                    {{/each}}
                 </div>
             </div>
 
@@ -51,7 +38,7 @@
             </div>
             <div class="input-box">
                 <textarea id="userInput" rows="2" class="form-control" placeholder="Enter your query..."></textarea>
-                <button class="btn btn-primary ms-2" onclick="sendMessage()"><i class="bi bi-send-fill"></i></button>
+                <button class="btn btn-primary ms-2" id="sendMessage" onclick="sendMessage()"><i class="bi bi-send-fill"></i></button>
             </div>
         </div>
         <!-- Cột bên phải: Bản đồ Google Maps -->
