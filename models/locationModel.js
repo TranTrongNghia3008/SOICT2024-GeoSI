@@ -29,8 +29,7 @@ const locationSchema = new mongoose.Schema({
   },
   sentiment: {
     type: String, // Giá trị cảm xúc, ví dụ: 'positive', 'neutral', 'negative'
-    enum: ['positive', 'neutral', 'negative'],
-    required: true
+    enum: ['positive', 'neutral', 'negative']
   }
 }, { timestamps: true });
 

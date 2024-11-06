@@ -18,6 +18,7 @@ def search_relevant_links(query: SearchQuery, topK: int, conversationsessionsID:
     driver = webdriver.Chrome(service=chrome_service, options=chrome_options)
     
     search_url = f'https://www.google.com/search?q=site:{query.site} {query.query}'
+    print(search_url)
     driver.get(search_url)
 
     articles = driver.find_elements(By.CLASS_NAME, 'N54PNb')
@@ -37,7 +38,6 @@ def search_relevant_links(query: SearchQuery, topK: int, conversationsessionsID:
             link_article = LinkArticle(
                 title=title,
                 link=link,
-    # Initialize with an empty ListLocation or populate if location data is available
             )
             links.append(link_article)
     print(links)
@@ -48,6 +48,7 @@ def search_relevant_links(query: SearchQuery, topK: int, conversationsessionsID:
 
 def convert_to_pdf(link_articles: List[LinkArticle], conversationsessionsID: str):
     file_paths = []
+    links = []
 
     session_storage_path = f"{STORAGE_PATH}/{conversationsessionsID}"
     os.makedirs(session_storage_path, exist_ok=True)
@@ -56,11 +57,12 @@ def convert_to_pdf(link_articles: List[LinkArticle], conversationsessionsID: str
         title = re.sub(r'[^a-zA-Z\s]', '', article.title)
         title = title.replace(" ", "_")
         pdf_path = f"{session_storage_path}/{title}.pdf"
+        url = article.link
 
         existing_article = db.articlefiles.find_one({
             "Link": article.link
         })
-
+        
         if existing_article:
             file_id = existing_article["FileId"]
 
@@ -79,35 +81,42 @@ def convert_to_pdf(link_articles: List[LinkArticle], conversationsessionsID: str
             
             print(f"Tải file PDF từ MongoDB: {pdf_path}")
             file_paths.append(pdf_path)
+            links.append(article)
             
             continue
 
-        file_paths.append(pdf_path)
-        url = article.link
+    
+        try: 
+            driver = webdriver.Chrome(service=chrome_service, options=chrome_options)
+            # Access the webpage and create PDF
+            driver.get(url)
+            
+            print_options = {'path': pdf_path, 'printBackground': True}
+            pdf = driver.execute_cdp_cmd("Page.printToPDF", print_options)
+            
+            # Decode and save the PDF file
+            pdf_data = base64.b64decode(pdf['data'])
 
-        driver = webdriver.Chrome(service=chrome_service, options=chrome_options)
+            with open(pdf_path, 'wb') as f:
+                f.write(pdf_data)
+            driver.quit()
 
-        # Access the webpage and create PDF
-        driver.get(url)
-        print_options = {'path': pdf_path, 'printBackground': True}
-        pdf = driver.execute_cdp_cmd("Page.printToPDF", print_options)
+            file_id = fs.put(pdf_data, filename=pdf_path)
 
-        # Decode and save the PDF file
-        pdf_data = base64.b64decode(pdf['data'])
-        with open(pdf_path, 'wb') as f:
-            f.write(pdf_data)
-        driver.quit()
+            db.articlefiles.insert_one({
+                "SessionID": conversationsessionsID,
+                "Title": article.title,
+                "Link": article.link,
+                "FileId": file_id, 
+                "createdAt": datetime.utcnow(),
+                "updatedAt": datetime.utcnow(),
+            })
 
-        file_id = fs.put(pdf_data, filename=pdf_path)
-        db.articlefiles.insert_one({
-            "SessionID": conversationsessionsID,
-            "Title": article.title,
-            "Link": article.link,
-            "FileId": file_id, 
-            "createdAt": datetime.utcnow(),
-            "updatedAt": datetime.utcnow(),
-        })
+            file_paths.append(pdf_path)
+            links.append(article) 
+        except:
+            print(f"Unable to crawl website: {url}")
 
     print(f"PDF files saved to: {file_paths}")
 
-    return file_paths
+    return file_paths, links

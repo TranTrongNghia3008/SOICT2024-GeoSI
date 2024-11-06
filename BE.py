@@ -29,7 +29,7 @@ async def start_session(user_id: str):
         "UserID": user_id,
         "History": [],
         "VectorStoreID": None,
-        "AssistantID": None,
+        "AssistantID": None,  
         "Title": "New Chat",
         "createdAt": datetime.utcnow(),
         "updatedAt": datetime.utcnow(),
@@ -87,11 +87,11 @@ async def get_relevant_links(text: str, topK: int, conversationsessionsID: str):
     query = analyze_prompt(text)
     print(query)
     
-    if not query.site:
-        return JSONResponse(content={"message": "No site found in the text"}, status_code=400)
+    # if not query.site:
+    #     return JSONResponse(content={"message": "No site found in the text"}, status_code=400)
     
     links = search_relevant_links(query, topK, conversationsessionsID)
-    file_paths = convert_to_pdf(links, conversationsessionsID)
+    file_paths, links = convert_to_pdf(links, conversationsessionsID)
     
     location_request = LocationRequest(
         link_articles=links,
@@ -116,8 +116,13 @@ async def get_response(request: ResponseRequest):
     assistant_id = session.get("AssistantID")
     history = session.get("History")
 
-    if not history:
+    if not assistant_id:
         isCrawl = True
+        vector_store = create_vector_store(conversationsessionsID)
+        vector_store_id = vector_store.id
+
+        assistant = create_assistant(vector_store_id)
+        assistant_id = assistant.id
 
     relevant_files = {"query": text, "links": [], "file paths": [], "locations": []}
     
@@ -127,13 +132,14 @@ async def get_response(request: ResponseRequest):
             link=linkSpecific
         )
         relevant_files["links"] = [custom_articles]
-        relevant_files["file paths"] = convert_to_pdf([custom_articles], conversationsessionsID)
+        relevant_files["file paths"], relevant_files["links"] = convert_to_pdf([custom_articles], conversationsessionsID)
+        
     elif isCrawl:
         relevant_files = await get_relevant_links(text=text, topK=topK, conversationsessionsID=conversationsessionsID)
     else:
         relevant_files = {}
     
-    if relevant_files:
+    if relevant_files and relevant_files["file paths"]:
         if not vector_store_id:
             vector_store = create_vector_store(conversationsessionsID)
             vector_store_id = vector_store.id
@@ -161,7 +167,7 @@ async def get_response(request: ResponseRequest):
         f"Given the query below, identify and return the key details explicitly mentioned that are necessary for information retrieval.\n\n"
         f"QUERY: '{text}'"
     )
-    
+        
     response = flow_qa(prompt, assistant_id)
     response = re.sub(r"【[^】]*source】", "", response)
     db.conversationsessions.update_one(

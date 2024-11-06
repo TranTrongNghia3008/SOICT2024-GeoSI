@@ -47,6 +47,7 @@ async function initMap() {
         center: { lat: 0, lng: 0 }  // Trung tâm bản đồ tại (0, 0)
     });
 
+
     const icons = {
         positive: {
             icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'  // Đánh dấu màu xanh cho cảm xúc tích cực
@@ -65,7 +66,7 @@ async function initMap() {
         const marker = new google.maps.Marker({
             position: { lat: article.lat, lng: article.lon },
             map: map,
-            icon: icons[article.sentiment].icon,  // Đặt màu marker dựa trên cảm xúc
+            icon: icons[article.sentiment].icon || 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png',  // Đặt màu marker dựa trên cảm xúc
             title: `${article.administrative_area}, ${article.country}`
         });
 
@@ -147,9 +148,8 @@ async function sendMessage() {
         linkSpecific = userMessage.match(urlRegex)[0]; // Extract the first URL found
         userMessage = userMessage.replace(urlRegex, "").trim(); // Remove the URL from userMessage
     }
-    console.log(userMessage)
+
     if (userMessage) {
-        console.log(userMessage)
         // Tạo thẻ chứa tin nhắn của người dùng
         var userMessageDiv = document.createElement('div');
         userMessageDiv.classList.add('message', 'user');
@@ -289,6 +289,8 @@ function formatTextToHtml(text) {
     
     // Replace markdown-style bold **text** with <strong>text</strong>
     text = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+    text = text.replace(/:\s*-\s*/g, ":<br> - "); 
+    text = text.replace(/\.\s*-\s*/g, ".<br> - ");
 
     // Wrap remaining text in <p> tags to maintain paragraph structure
     text = `<p>${text.replace(/\n\n/g, "</p><p>")}</p>`; // Separate paragraphs
@@ -567,3 +569,12 @@ async function renameConversation(event, id) {
         document.getElementById(`titleDisplay-${id}`).classList.remove('d-none');
     }
 }
+
+document.getElementById('userInput').addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+        if (!event.shiftKey) {
+            event.preventDefault(); // Prevents adding a newline
+            sendMessage(); // Calls the sendMessage function
+        }
+    }
+});
