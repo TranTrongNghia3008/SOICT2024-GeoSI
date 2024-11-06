@@ -13,5 +13,8 @@ router.post('/conversations/new', controller.createNewChat);
 router.delete('/conversations/:id', controller.deleteConversation);
 
 router.put('/conversations/:id/updateHistory', controller.updateHistory);
+router.put('/conversations/:id/updateLocations', controller.updateLocations);
+router.put('/conversations/:id/renameConversation', controller.renameConversation);
+router.get('/conversations/:id/locations', controller.loadLocations);
 
 module.exports = router;
