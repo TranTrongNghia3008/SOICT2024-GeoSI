@@ -1,3 +1,10 @@
+<div id="overlay" class="d-none"></div>
+<div id="spinner" class="d-none">
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+
 <div class="container-fluid">
     <div class="row">
         <!-- Cột bên trái: Phần Hỏi Đáp -->
@@ -20,18 +27,32 @@
                 <h5 class="p-2">Your conversation list</h5>
                 <div class="list-group">
                     {{#each conversations}} 
-                    <div class=" d-flex justify-content-between list-group-item list-group-item-action">
-                        <a href="#" class="chat-list-item" data-id="{{this._id}}" onclick="loadHistory('{{this._id}}')">
-                            {{this.Title}}
-                        </a>
-                        <a href="" data-bs-toggle="tooltip" title="Delete" class="mx-2 my-auto text-danger delete-history" data-id="{{this._id}}">
-                            <i class="bi bi-trash"></i>
-                        </a>
+                    <div class="d-flex justify-content-between list-group-item list-group-item-action">
+                        <div>
+                            <!-- Title Display and Inline Editing -->
+                            <a href="#" class="chat-list-item" data-id="{{this._id}}" onclick="loadHistory('{{this._id}}')">
+                                <span class="title-display" id="titleDisplay-{{this._id}}">{{this.Title}}</span>
+                            </a>
+                            <!-- Input Field for Editing -->
+                            <input type="text" class="edit-input d-none" id="editInput-{{this._id}}" value="{{this.Title}}" 
+                                onkeydown="renameConversation(event, '{{this._id}}')">
+                        </div>
+
+                        <div>
+                            <a href="#" data-bs-toggle="tooltip" title="Rename" class="my-auto mx-2 rename-title" 
+                            data-id="{{this._id}}" onclick="showRenameInput('{{this._id}}')">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="#" data-bs-toggle="tooltip" title="Delete" class="mx-2 my-auto text-danger delete-history" 
+                            data-id="{{this._id}}">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
                     </div>
-                        
                     {{/each}}
                 </div>
             </div>
+
 
             <div class="chat-box shadow-sm rounded" id="chatBox">
                 <!-- Các tin nhắn sẽ hiển thị tại đây -->

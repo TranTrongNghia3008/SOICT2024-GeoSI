@@ -3,16 +3,13 @@ const mongoose = require('mongoose');
 const locationSchema = new mongoose.Schema({
   SessionID: { type: mongoose.Schema.Types.ObjectId, ref: 'ConversationSession', required: true  },
   administrative_area: {
-    type: String,
-    required: true
+    type: String
   },
   country: {
-    type: String,
-    required: true
+    type: String
   },
   continent: {
-    type: String,
-    required: true
+    type: String
   },
   lat: {
     type: Number,
@@ -32,8 +29,7 @@ const locationSchema = new mongoose.Schema({
   },
   sentiment: {
     type: String, // Giá trị cảm xúc, ví dụ: 'positive', 'neutral', 'negative'
-    enum: ['positive', 'neutral', 'negative'],
-    required: true
+    enum: ['positive', 'neutral', 'negative']
   }
 }, { timestamps: true });
 

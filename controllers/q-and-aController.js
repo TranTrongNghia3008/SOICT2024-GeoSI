@@ -1,6 +1,7 @@
 'use strict';
 
 const ConversationSession = require('../models/conversationSessionModel'); // Import model
+const Location = require('../models/locationModel');
 
 const controller = {};
 
@@ -93,5 +94,70 @@ controller.updateHistory = async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 };
+
+controller.updateLocations = async (req, res) => {
+    try {
+        const { locations } = req.body;
+        const sessionID = req.params.id;
+        console.log(sessionID)
+
+        // Xóa tất cả locations cũ có SessionID là conversationId
+        await Location.deleteMany({ SessionID: sessionID });
+
+        // Thêm mới các locations
+        const newLocations = locations.map(loc => ({
+            SessionID: sessionID,
+            administrative_area: loc.administrative_area,
+            country: loc.country,
+            continent: loc.continent,
+            lat: loc.lat,
+            lon: loc.lon,
+            links: loc.links,
+            summaries: loc.summaries,
+            sentiment: loc.sentiment
+        }));
+
+        await Location.insertMany(newLocations);
+
+        res.status(200).json({ message: 'Locations updated successfully' });
+    } catch (error) {
+        console.error('Error updating locations:', error);
+        res.status(500).json({ message: 'Failed to update locations', error: error.message });
+    }
+};
+
+controller.loadLocations = async (req, res) => {
+    const conversationId = req.params.id;
+
+    try {
+        // Tìm tất cả các location có SessionID khớp với conversationId
+        const locations = await Location.find({ SessionID: conversationId });
+
+        // Nếu không có location nào tìm thấy
+        if (!locations.length) {
+            return res.status(404).json({ message: 'No locations found for this conversation ID' });
+        }
+
+        // Trả về danh sách locations
+        res.status(200).json({ locations });
+    } catch (error) {
+        console.error('Error fetching locations:', error);
+        res.status(500).json({ message: 'Error fetching locations', error: error.message });
+    }
+}
+
+controller.renameConversation = async (req, res) => {
+    const id = req.params.id;
+    const { title } = req.body;
+
+    console.log(id, title)
+
+    try {
+        await ConversationSession.updateOne({ _id: id }, { $set: { Title: title } });
+        res.status(200).send({ message: 'Title updated successfully' });
+    } catch (error) {
+        res.status(500).send({ error: 'Error updating title' });
+    }
+}
 
 module.exports = controller;

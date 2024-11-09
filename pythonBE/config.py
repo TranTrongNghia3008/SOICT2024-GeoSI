@@ -21,6 +21,7 @@ from openai import AssistantEventHandler, OpenAI
 from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import JSONResponse
 from typing import List, Optional
+from fastapi.middleware.cors import CORSMiddleware
 
 # For MongoDB
 import os
@@ -36,7 +37,7 @@ client = OpenAI(
     api_key = "",
 )
 
-clientMongoDB = MongoClient("")
+clientMongoDB = MongoClient("mongodb+srv://admin:jsmFDvCxbGcoBBfr@cluster0.om2fx.mongodb.net/")
 db = clientMongoDB["GeoSI"]
 fs = gridfs.GridFS(db)
 
@@ -53,9 +54,22 @@ chrome_service = Service(ChromeDriverManager().install())
 
 class SearchQuery(BaseModel):
     site: str
-    keyword: str
+    query: str
 
 class Location(BaseModel):
+    administrative_area: str
+    country: str
+    continent: str
+    lat: float
+    lon: float
+    links: Optional[List[str]] = []
+    summaries: Optional[List[str]] = []
+    sentiment: str
+
+class ListLocation(BaseModel):
+    listLocation: List[Location]
+    
+class LocationFromBot(BaseModel):
     administrative_area: str
     country: str
     continent: str
@@ -64,8 +78,32 @@ class Location(BaseModel):
     summary: str
     sentiment: str
 
-class ListLocation(BaseModel):
-    listLocation: list[Location]
+class ListLocationFromBot(BaseModel):
+    listLocation: List[LocationFromBot]
+    
+class LinkArticle(BaseModel):
+    title: str
+    link: str
+    local: Optional[ListLocation] = []
+
+class LocationRequest(BaseModel):
+    link_articles: List[LinkArticle]
+    files_path: List[str]
+    conversationsessionsID: str
+    
+
+class ResponseRequest(BaseModel):
+    text: str
+    isCrawl: bool
+    linkSpecific: str
+    topK: int
+    conversationsessionsID: str
+    
+class ResponseModel(BaseModel):
+    textAnswer: str
+    links: List[str]
+    locations: List[Location]
+    status: str
 
 class EventHandler(AssistantEventHandler):
     def __init__(self):

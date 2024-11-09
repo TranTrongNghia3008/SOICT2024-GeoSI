@@ -3,79 +3,151 @@ const links = [
     "https://example.com/new-climate-article-2"
 ];
 
+// const link_articles = [
+//     {'title': 'Climate change intensifies La Nina, leading to stronger ...', 'link': 'https://e.vnexpress.net/news/news/environment/climate-change-intensifies-la-nina-leading-to-stronger-storms-experts-4791721.html'}, 
+//     {'title': 'Record April Heat Across Asia Intensified by Climate Change', 'link': 'https://e.vnexpress.net/news/news/environment/asia-s-extreme-april-heat-worsened-by-climate-change-scientists-say-4746219.html'}, 
+//     {'title': 'Climate change could force Thailand to relocate capital ...', 'link': 'https://e.vnexpress.net/news/news/environment/climate-change-could-force-thailand-to-relocate-capital-bangkok-4746839.html'}, 
+//     {'title': 'World warming at record 0.2C per decade, scientists warn', 'link': 'https://e.vnexpress.net/news/world/world-warming-at-record-0-2c-per-decade-scientists-warn-4615206.html'}, 
+//     {'title': 'Vietnam needs $35 bln for climate change adaptation: PM', 'link': 'https://e.vnexpress.net/news/news/vietnam-needs-35-bln-for-climate-change-adaptation-pm-4226847.html'}]
+
+// const files_path = ['./storage/pdf_files/67113ed6345737d006d94870/Climate_change_intensifies_La_Nina_leading_to_stronger_.pdf', './storage/pdf_files/67113ed6345737d006d94870/Record_April_Heat_Across_Asia_Intensified_by_Climate_Change.pdf', './storage/pdf_files/67113ed6345737d006d94870/Climate_change_could_force_Thailand_to_relocate_capital_.pdf', './storage/pdf_files/67113ed6345737d006d94870/World_warming_at_record_C_per_decade_scientists_warn.pdf', './storage/pdf_files/67113ed6345737d006d94870/Vietnam_needs__bln_for_climate_change_adaptation_PM.pdf']
+const link_articles = []
+const files_path = []
+var linkSpecific = ""
+var topK = 5
+var isCrawl = true
+var locations = []
+
+async function loadLocations() {
+    const conversationId = localStorage.getItem('conversationId');
+    try {
+        const response = await fetch(`http://localhost:4000/q-and-a/conversations/${conversationId}/locations`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error fetching locations: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data.locations;  // Giả sử API trả về { locations: [...] }
+    } catch (error) {
+        console.error('Error loading locations:', error);
+        return [];  // Trả về mảng rỗng nếu có lỗi
+    }
+}
+
+
 async function initMap() {
     const map = new google.maps.Map(document.getElementById('map'), {
         zoom: 2,  // Mức thu phóng ban đầu
         center: { lat: 0, lng: 0 }  // Trung tâm bản đồ tại (0, 0)
     });
 
-    try {
-        // Gửi yêu cầu POST đến API để lấy dữ liệu địa điểm
-        const response = await fetch('http://localhost:8000/locations/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(links)  // Gửi mảng links
-        });
 
-        // Kiểm tra phản hồi từ API
-        if (!response.ok) {
-            throw new Error(`Network response was not ok: ${response.statusText}`);
+    const icons = {
+        positive: {
+            icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'  // Đánh dấu màu xanh cho cảm xúc tích cực
+        },
+        negative: {
+            icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'  // Đánh dấu màu đỏ cho cảm xúc tiêu cực
+        },
+        neutral: {
+            icon: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png'  // Đánh dấu màu vàng cho cảm xúc trung tính
         }
+    };
+    locations = await loadLocations();
 
-        // Chờ và lấy dữ liệu JSON
-        const locations = await response.json();
-
-        const icons = {
-            positive: {
-                icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'  // Đánh dấu màu xanh cho cảm xúc tích cực
-            },
-            negative: {
-                icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'  // Đánh dấu màu đỏ cho cảm xúc tiêu cực
-            },
-            neutral: {
-                icon: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png'  // Đánh dấu màu vàng cho cảm xúc trung tính
-            }
-        };
-
-        // Thêm các marker cho mỗi địa điểm
-        locations.forEach(article => {
-            const marker = new google.maps.Marker({
-                position: { lat: article.lat, lng: article.lon },
-                map: map,
-                icon: icons[article.sentiment].icon,  // Đặt màu marker dựa trên cảm xúc
-                title: `${article.administrative_area}, ${article.country}`
-            });
-
-            // Tạo nội dung cho cửa sổ thông tin
-            let contentString = `<b>${article.administrative_area}, ${article.country}</b><br>`;
-            article.links.forEach((link, index) => {
-                const summary = article.summaries[index] || "No summary";  // Đảm bảo không có lỗi nếu không có tóm tắt
-                contentString += `<a href="${link}" target="_blank">${summary}</a><a href="#" data-bs-toggle="tooltip" title="Q & A" onclick="sendMessageFromLocation('${summary}')"><i class="bi bi-question-circle"></i></a><br>`;
-            });
-
-            const infoWindow = new google.maps.InfoWindow({
-                content: contentString
-            });
-
-            // Hiển thị cửa sổ thông tin khi nhấp vào marker
-            marker.addListener('click', () => {
-                infoWindow.open(map, marker);
-            });
+    // Thêm các marker cho mỗi địa điểm
+    locations.forEach(article => {
+        const marker = new google.maps.Marker({
+            position: { lat: article.lat, lng: article.lon },
+            map: map,
+            icon: icons[article.sentiment].icon || 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png',  // Đặt màu marker dựa trên cảm xúc
+            title: `${article.administrative_area}, ${article.country}`
         });
-    } catch (error) {
-        console.error('Error fetching location data:', error);
-    }
+
+        // Tạo nội dung cho cửa sổ thông tin
+        let contentString = `<b>${article.administrative_area}, ${article.country}</b><br>`;
+        article.links.forEach((link, index) => {
+            const summary = article.summaries[index] || "No summary";  // Đảm bảo không có lỗi nếu không có tóm tắt
+            contentString += `<a href="${link}" target="_blank">${summary}</a><a href="#" data-bs-toggle="tooltip" title="Q & A" onclick="sendMessageFromLocation('${summary}', '${link}')"><i class="bi bi-question-circle"></i></a><br>`;
+        });
+
+        const infoWindow = new google.maps.InfoWindow({
+            content: contentString
+        });
+
+        // Hiển thị cửa sổ thông tin khi nhấp vào marker
+        marker.addListener('click', () => {
+            infoWindow.open(map, marker);
+        });
+    });
 }
+
 
 // Gọi hàm initMap khi trang được tải
 window.onload = initMap;
 
+function mergeLocations(existingLocations, newLocations) {
+    // Tạo một map để lưu các vị trí theo key duy nhất
+    const locationMap = new Map();
+
+    // Đưa các vị trí hiện có vào map
+    existingLocations.forEach(location => {
+        const key = `${location.administrative_area}-${location.country}-${location.continent}-${location.lat}-${location.lon}`;
+        locationMap.set(key, { ...location }); // Sao chép location để tránh tham chiếu trực tiếp
+    });
+
+    // Thêm hoặc gộp các vị trí mới vào map
+    newLocations.forEach(newLocation => {
+        const key = `${newLocation.administrative_area}-${newLocation.country}-${newLocation.continent}-${newLocation.lat}-${newLocation.lon}`;
+        if (locationMap.has(key)) {
+            const existingLocation = locationMap.get(key);
+
+            // Gộp links và summaries
+            existingLocation.links = Array.from(new Set([...existingLocation.links, ...newLocation.links]));
+            existingLocation.summaries = Array.from(new Set([...existingLocation.summaries, ...newLocation.summaries]));
+        } else {
+            locationMap.set(key, { ...newLocation }); // Thêm vị trí mới nếu chưa tồn tại
+        }
+    });
+
+    // Chuyển map thành mảng
+    return Array.from(locationMap.values());
+}
+
+function showSpinner() {
+    const spinner = document.getElementById('spinner');
+    const overlay = document.getElementById('overlay');
+    overlay.classList.remove('d-none'); // Show the overlay
+    spinner.classList.remove('d-none'); // Show the spinner
+}
+
+function hideSpinner() {
+    const spinner = document.getElementById('spinner');
+    const overlay = document.getElementById('overlay');
+    overlay.classList.add('d-none'); // Hide the overlay
+    spinner.classList.add('d-none'); // Hide the spinner
+}
+
 async function sendMessage() {
+    showSpinner()
+    const conversationsessionsID = localStorage.getItem('conversationId');
     var input = document.getElementById('userInput');
     var chatBox = document.getElementById('chatBox');
     var userMessage = input.value.trim();
+
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    
+    // Check if userMessage contains a link and separate it
+    if (urlRegex.test(userMessage)) {
+        linkSpecific = userMessage.match(urlRegex)[0]; // Extract the first URL found
+        userMessage = userMessage.replace(urlRegex, "").trim(); // Remove the URL from userMessage
+    }
 
     if (userMessage) {
         // Tạo thẻ chứa tin nhắn của người dùng
@@ -97,7 +169,7 @@ async function sendMessage() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ text: userMessage, is_crawl: false })  // Gửi tin nhắn và trạng thái isCrawl
+                body: JSON.stringify({ text: userMessage, isCrawl, linkSpecific, topK, conversationsessionsID })  // Gửi tin nhắn và trạng thái isCrawl
             });
 
             // Kiểm tra phản hồi từ API
@@ -107,19 +179,59 @@ async function sendMessage() {
 
             // Chờ và lấy dữ liệu JSON
             const data = await response.json();
-            var botMessageDiv = document.createElement('div');
-            botMessageDiv.classList.add('message', 'bot');
-            botMessageDiv.innerHTML = '<div class="content">' + data.text + '</div>'; // Sử dụng text từ phản hồi
-            chatBox.appendChild(botMessageDiv);
+            locations = mergeLocations(locations, data.locations);
+            
+            console.log(data.locations)
+            await updateLocations()
+            // link_articles = data.links;
+            // var botMessageDiv = document.createElement('div');
+            // botMessageDiv.classList.add('message', 'bot');
+            // botMessageDiv.innerHTML = '<div class="content">' + data.textAnswer + '</div>'; // Sử dụng text từ phản hồi
+            // chatBox.appendChild(botMessageDiv);
 
-            // Cuộn xuống để xem tin nhắn mới
-            chatBox.scrollTop = chatBox.scrollHeight;
+            // // Cuộn xuống để xem tin nhắn mới
+            // chatBox.scrollTop = chatBox.scrollHeight;
 
-            await updateHistory(userMessage, data.text);
+            // await updateHistory(userMessage, data.textAnswer);
+            await loadHistory(conversationsessionsID);
+            toggleChatList = document.getElementById('toggleChatList');
+            toggleChatList.click();
+            await initMap();
+            isCrawl = false
+            linkSpecific = ""
 
         } catch (error) {
             console.error('Error fetching response:', error);
+        } finally {
+            // Hide the spinner
+            hideSpinner()
         }
+        
+    }
+}
+
+async function updateLocations() {
+    try {
+        // Giả sử bạn đã lưu conversationId khi chọn cuộc trò chuyện
+        const conversationId = localStorage.getItem('conversationId');
+
+        // Gọi API cập nhật History
+        const response = await fetch(`q-and-a/conversations/${conversationId}/updateLocations`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ locations })
+        });
+
+        // Kiểm tra phản hồi từ API cập nhật History
+        if (!response.ok) {
+            throw new Error(`Network response was not ok: ${response.statusText}`);
+        }
+
+        console.log('History updated successfully');
+    } catch (error) {
+        console.error('Error updating locations:', error);
     }
 }
 
@@ -150,10 +262,11 @@ async function updateHistory(userMessage, botMessage) {
     }
 }
 
-async function sendMessageFromLocation(query) {
-    console.log(query)
+async function sendMessageFromLocation(query, link) {
+    isCrawl = true
+    linkSpecific = link
     var input = document.getElementById('userInput');
-    input.innerText = query;
+    input.value = query;
     var sendMessageBtn = document.getElementById('sendMessage');
     sendMessageBtn.click();
 }
@@ -167,6 +280,24 @@ document.getElementById('toggleChatList').addEventListener('click', function() {
         chatList.classList.add('d-none');
     }
 });
+
+function formatTextToHtml(text) {  
+    // Wrap the modified text in <ol> tags if numbered points exist
+    if (text.includes("<li><strong>")) {
+        text = `<ol>${text}</ol>`;
+    }
+    
+    // Replace markdown-style bold **text** with <strong>text</strong>
+    text = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+    text = text.replace(/:\s*-\s*/g, ":<br> - "); 
+    text = text.replace(/\.\s*-\s*/g, ".<br> - ");
+
+    // Wrap remaining text in <p> tags to maintain paragraph structure
+    text = `<p>${text.replace(/\n\n/g, "</p><p>")}</p>`; // Separate paragraphs
+
+    return text.trim();
+}
+
 
 
 async function loadHistory(conversationId) {
@@ -199,8 +330,12 @@ async function loadHistory(conversationId) {
                 messageDiv.innerHTML = '<div class="content">' + message.replace('User: ', '') + '</div>'; // Loại bỏ "User: "
             } else if (message.startsWith('System:')) {
                 messageDiv.classList.add('message', 'bot'); // Thêm lớp cho tin nhắn của bot
-                messageDiv.innerHTML = '<div class="content">' + message.replace('System: ', '') + '</div>'; // Loại bỏ "System: "
+                messageDiv.innerHTML = '<div class="content">' + formatTextToHtml(message.replace('System: ', '')) + '</div>'; // Loại bỏ "System: "
+            } else if (message.startsWith('Ref:') && message.length > 6) {
+                messageDiv.classList.add('message', 'bot'); // Thêm lớp cho tin nhắn của bot
+                messageDiv.innerHTML = '<div class="content">' + message.replace('Ref: ', '') + '</div>'; // Loại bỏ "System: "
             }
+
 
             // Thêm messageDiv vào chatBox
             chatBox.appendChild(messageDiv);
@@ -209,6 +344,8 @@ async function loadHistory(conversationId) {
         // Cuộn xuống để xem tin nhắn mới
         chatBox.scrollTop = chatBox.scrollHeight;
 
+        await initMap();
+
     } catch (error) {
         console.error('Error loading history:', error);
     }
@@ -216,10 +353,10 @@ async function loadHistory(conversationId) {
 
 async function createNewChat(userID) {
     var chatBox = document.getElementById('chatBox');
-    chatBox.innerHTML = ''; // Xóa nội dung hiện tại
+    chatBox.innerHTML = ''; // Clear current chat content
 
     try {
-        // Gửi yêu cầu tạo cuộc hội thoại mới
+        // Send request to create a new conversation
         const response = await fetch('http://localhost:4000/q-and-a/conversations/new', {
             method: 'POST',
             headers: {
@@ -227,8 +364,8 @@ async function createNewChat(userID) {
             },
             body: JSON.stringify({
                 UserID: userID,
-                Title: 'New Chat', 
-                History: [] 
+                Title: 'New Chat',
+                History: []
             }),
         });
 
@@ -236,32 +373,76 @@ async function createNewChat(userID) {
             throw new Error('Error creating new chat: ' + response.statusText);
         }
 
-        const data = await response.json(); // Nhận dữ liệu từ server
+        const data = await response.json(); // Get response data from server
 
-        // Create a new chat-list-item and add it to the top of the chat list
+        // Create a new chat item and add it to the top of the chat list
         const chatList = document.querySelector('.list-group');
-        
+
         const newChatItem = document.createElement('div');
         newChatItem.classList.add('d-flex', 'justify-content-between', 'list-group-item', 'list-group-item-action');
+
+        // Title display and inline editing setup
+        const titleContainer = document.createElement('div');
 
         const newChatLink = document.createElement('a');
         newChatLink.href = '#';
         newChatLink.classList.add('chat-list-item');
-        newChatLink.setAttribute('data-id', data._id); // Use the new chat's ID
-        newChatLink.textContent = data.Title; // Display the chat title
-        newChatLink.onclick = () => loadHistory(data._id); // Set click event to load history
-        
+        newChatLink.setAttribute('data-id', data._id);
+        newChatLink.onclick = () => loadHistory(data._id); // Load history on click
+
+        const titleDisplay = document.createElement('span');
+        titleDisplay.classList.add('title-display');
+        titleDisplay.id = `titleDisplay-${data._id}`;
+        titleDisplay.textContent = data.Title;
+
+        // Append title display to link
+        newChatLink.appendChild(titleDisplay);
+        titleContainer.appendChild(newChatLink);
+
+        // Editable input for renaming
+        const editInput = document.createElement('input');
+        editInput.type = 'text';
+        editInput.classList.add('edit-input', 'd-none');
+        editInput.id = `editInput-${data._id}`;
+        editInput.value = data.Title;
+
+        // On key down, handle renaming
+        editInput.onkeydown = (event) => {
+            renameConversation(event, data._id)
+        };
+
+        titleContainer.appendChild(editInput);
+
+        // Append titleContainer to newChatItem
+        newChatItem.appendChild(titleContainer);
+
+        // Rename and Delete actions
+        const actionContainer = document.createElement('div');
+
+        const renameIcon = document.createElement('a');
+        renameIcon.href = '#';
+        renameIcon.classList.add('my-auto', 'mx-2', 'rename-title');
+        renameIcon.setAttribute('data-bs-toggle', 'tooltip');
+        renameIcon.setAttribute('title', 'Rename');
+        renameIcon.setAttribute('data-id', data._id);
+        renameIcon.onclick = () => showRenameInput(data._id); // Show input for renaming
+        renameIcon.innerHTML = '<i class="bi bi-pencil"></i>';
+
         const deleteIcon = document.createElement('a');
-        deleteIcon.href = '';
-        deleteIcon.setAttribute('data-bs-toggle', 'tooltip');  // Added data-bs-toggle
-        deleteIcon.setAttribute('title', 'Delete');
+        deleteIcon.href = '#';
         deleteIcon.classList.add('mx-2', 'my-auto', 'text-danger', 'delete-history');
+        deleteIcon.setAttribute('data-bs-toggle', 'tooltip');
+        deleteIcon.setAttribute('title', 'Delete');
         deleteIcon.setAttribute('data-id', data._id);
+        deleteIcon.onclick = () => deleteConversation(data._id); // Call delete function
         deleteIcon.innerHTML = '<i class="bi bi-trash"></i>';
-        deleteIcon.onclick = () => deleteConversation(data._id);
-        
-        newChatItem.appendChild(newChatLink);
-        newChatItem.appendChild(deleteIcon);
+
+        // Append icons to actionContainer
+        actionContainer.appendChild(renameIcon);
+        actionContainer.appendChild(deleteIcon);
+
+        // Append actionContainer to newChatItem
+        newChatItem.appendChild(actionContainer);
 
         // Insert the new chat item at the top of the list
         chatList.insertBefore(newChatItem, chatList.firstChild);
@@ -269,10 +450,10 @@ async function createNewChat(userID) {
         // Automatically click on the new chat item to load it
         newChatLink.click();
 
-        toggleChatList = document.getElementById('toggleChatList');
-        toggleChatList.click();
-
-        // Có thể hiển thị thông báo hoặc làm gì đó với dữ liệu cuộc trò chuyện mới
+        // Toggle chat list visibility and initialize map
+        document.getElementById('toggleChatList').click();
+        locations = [];
+        await initMap();
     } catch (error) {
         console.error('Error creating new chat:', error);
     }
@@ -346,4 +527,54 @@ document.addEventListener('DOMContentLoaded', function() {
             deleteConversation(conversationID);
         });
     });
+});
+
+// Function to display the input field for renaming
+function showRenameInput(id) {
+    const titleDisplay = document.getElementById(`titleDisplay-${id}`);
+    const editInput = document.getElementById(`editInput-${id}`);
+
+    // Hide the display title and show the edit input
+    titleDisplay.classList.add('d-none');
+    editInput.classList.remove('d-none');
+    editInput.focus(); // Focus on the input field for immediate editing
+}
+
+// Function to rename the title and send request on Enter
+async function renameConversation(event, id) {
+    if (event.key === 'Enter') {
+        const editInput = document.getElementById(`editInput-${id}`);
+        const newTitle = editInput.value.trim();
+
+        // Send the update request if the title is changed
+        if (newTitle) {
+            try {
+                const response = await fetch(`/q-and-a/conversations/${id}/renameConversation`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: newTitle })
+                });
+
+                if (!response.ok) throw new Error('Failed to update title');
+
+                // Update the display with the new title
+                document.getElementById(`titleDisplay-${id}`).innerText = newTitle;
+            } catch (error) {
+                console.error('Error renaming title:', error);
+            }
+        }
+
+        // Hide the input and show the title display again
+        editInput.classList.add('d-none');
+        document.getElementById(`titleDisplay-${id}`).classList.remove('d-none');
+    }
+}
+
+document.getElementById('userInput').addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+        if (!event.shiftKey) {
+            event.preventDefault(); // Prevents adding a newline
+            sendMessage(); // Calls the sendMessage function
+        }
+    }
 });
