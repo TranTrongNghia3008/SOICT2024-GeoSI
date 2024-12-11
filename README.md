@@ -30,6 +30,10 @@ This source code implements GeoSI, submitted to SOICT 2024. It is a question-ans
 
 Please refer to this [Colab link](https://colab.research.google.com/drive/15RsJgG7nXEvnN5-ERo7MhZtJWrqoCxQO?usp=sharing) to run a test of the system's pipeline.
 
+# Video Demo
+Please  [Colab link](https://colab.research.google.com/drive/15RsJgG7nXEvnN5-ERo7MhZtJWrqoCxQO?usp=sharing) to run a test of the system's pipeline.
+Please review the video on YouTube through this [link](https://youtu.be/ZeeWB3Hu2zY).
+
 # Compare the results of the Q&A responses
 - **Question 1:** Give me the current climate change situation on vnexpress website
 	<div style="overflow-x: auto; white-space: nowrap;"> <div style="display: inline-block; width: 250px; text-align: center;"> <strong>Gemini:</strong><br> <img src="results/Gemini1.png" alt="Response of Gemini" title="Response of Gemini" style="width: 90%;"/> </div> <div style="display: inline-block; width: 250px; text-align: center;"> <strong>BingAI:</strong><br> <img src="results/Bing1.png" alt="Response of BingAI" title="Response of BingAI" style="width: 90%;"/> </div> <div style="display: inline-block; width: 250px; text-align: center;"> <strong>ChatGPT:</strong><br> <img src="results/ChatGPT1.png" alt="Response of ChatGPT" title="Response of ChatGPT" style="width: 90%;"/> </div> <div style="display: inline-block; width: 250px; text-align: center;"> <strong>GeoSI:</strong><br> <img src="results/GeoSI1.png" alt="Response of GeoSI" title="Response of GeoSI" style="width: 90%;"/> </div> </div>
