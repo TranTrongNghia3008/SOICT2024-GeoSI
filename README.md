@@ -31,7 +31,6 @@ This source code implements GeoSI, submitted to SOICT 2024. It is a question-ans
 Please refer to this [Colab link](https://colab.research.google.com/drive/15RsJgG7nXEvnN5-ERo7MhZtJWrqoCxQO?usp=sharing) to run a test of the system's pipeline.
 
 # Video Demo
-Please  [Colab link](https://colab.research.google.com/drive/15RsJgG7nXEvnN5-ERo7MhZtJWrqoCxQO?usp=sharing) to run a test of the system's pipeline.
 Please review the video on YouTube through this [link](https://youtu.be/ZeeWB3Hu2zY).
 
 # Compare the results of the Q&A responses
